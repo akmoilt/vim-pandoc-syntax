@@ -1,3 +1,4 @@
+scriptencoding utf-8
 " vim: set fdm=marker foldlevel=0:
 " 
 " Vim syntax file
@@ -139,11 +140,11 @@ function! EnableEmbedsforCodeblocksWithLang(entry)
         let s:langsyntaxfile = matchstr(a:entry, "[^=]*$")
         unlet! b:current_syntax
         exe 'syn include @'.toupper(s:langname).' syntax/'.s:langsyntaxfile.'.vim'
-        exe "syn region pandocDelimitedCodeBlock_" . s:langname . ' start=/\(\_^\(\s\{4,}\)\=\(`\{3,}`*\\)\s*\%({[^.]*\.\)\=' . s:langname . '\>.*\n\)\@<=\_^/' .
-		    \' end=/\_$\n\(\(\s\{4,}\)\=\(`\{3,}`*\\)\_$\n\_$\)\@=/ contained containedin=pandocDelimitedCodeBlock' .
+        exe "syn region pandocDelimitedCodeBlock_" . s:langname . ' start=/\(\_^\(\s\{4,}\)\=\(`\{3,}`*\|\~\{3,}\~*\)\s*\%({[^.]*\.\)\=' . s:langname . '\>.*\n\)\@<=\_^/' .
+		    \' end=/\_$\n\(\(\s\{4,}\)\=\(`\{3,}`*\|\~\{3,}\~*\)\_$\n\_$\)\@=/ contained containedin=pandocDelimitedCodeBlock' .
 		    \' contains=@' . toupper(s:langname)
-	exe "syn region pandocDelimitedCodeBlockinBlockQuote_" . s:langname . ' start=/>\s\(`\{3,}`*\\)\s*\%({[^.]*\.\)\=' . s:langname . '\>/' .
-		    \ ' end=/\(`\{3,}`*\\)/ contained containedin=pandocDelimitedCodeBlock' .
+	exe "syn region pandocDelimitedCodeBlockinBlockQuote_" . s:langname . ' start=/>\s\(`\{3,}`*\|\~\{3,}\~*\)\s*\%({[^.]*\.\)\=' . s:langname . '\>/' .
+		    \ ' end=/\(`\{3,}`*\|\~\{3,}\~*\)/ contained containedin=pandocDelimitedCodeBlock' .
 		    \' contains=@' . toupper(s:langname) . 
 		    \",pandocDelimitedCodeBlockStart,pandocDelimitedCodeBlockEnd,pandodDelimitedCodeblockLang,pandocBlockQuoteinDelimitedCodeBlock"
     catch /E484/
@@ -210,9 +211,10 @@ call s:WithConceal('html_c_e', 'syn match pandocHTMLCommentEnd /-->/ contained',
 unlet b:current_syntax
 syn include @LATEX syntax/tex.vim
 syn region pandocLaTeXInlineMath start=/\\\@<!\$[[:graph:]]\@=/ end=/\\\@<!\$/ keepend contains=@LATEX 
+syn region pandocLaTeXInlineMath start=/\\\@<!\\([[:graph:]]\@=/ end=/\\\@<!\\)/ keepend contains=@LATEX 
 syn match pandocProtectedFromInlineLaTeX /\\\@<!\${.*}\(\(\s\|[[:punct:]]\)\([^$]*\|.*\(\\\$.*\)\{2}\)\n\n\|$\)\@=/ display
 " contains=@LATEX
-syn region pandocLaTeXMathBlock start=/\$\$/ end=/\$\$/ keepend contains=@LATEX 
+syn region pandocLaTeXMathBlock start=/\$\$/ end=/\$\$/ keepend contains=@LATEX
 syn match pandocLaTeXCommand /\\[[:alpha:]]\+\(\({.\{-}}\)\=\(\[.\{-}\]\)\=\)*/ contains=@LATEX 
 syn region pandocLaTeXRegion start=/\\begin{\z(.\{-}\)}/ end=/\\end{\z1}/ keepend contains=@LATEX
 " we rehighlight sectioning commands, because otherwise tex.vim captures all text until EOF or a new sectioning command
@@ -332,7 +334,7 @@ syn match pandocHeaderAttr /{.*}/ contained containedin=pandocAtxHeader,pandocSe
 syn match pandocHeaderID /#[-_:.[:alpha:]]*/ contained containedin=pandocHeaderAttr
 "}}}
 " Line Blocks: {{{2
-syn region pandocLineBlock start=/^|/ end=/\(^|\(.*\n|\@!\)\@=.*\)\@<=\n/ 
+syn region pandocLineBlock start=/^|/ end=/\(^|\(.*\n|\@!\)\@=.*\)\@<=\n/ transparent
 syn match pandocLineBlockDelimiter /^|/ contained containedin=pandocLineBlock
 "}}}
 " Tables: {{{2
@@ -356,7 +358,7 @@ syn match pandocGridTableHeader /\%#=2\(^.*\n\)\(+=.*\)\@=/ contained containedi
 "}}}3
 " Pipe: {{{3
 " with beginning and end pipes
-syn region pandocPipeTable start=/\%#=2\([+|]\n\)\@<!\n\@1<=|\(.*|\)\@=/ end=/|.*\n\n/ containedin=ALLBUT,pandocDelimitedCodeBlock,pandocYAMLHeader keepend 
+syn region pandocPipeTable start=/\%#=2\([+|]\n\)\@<!\n\@1<=|\(.*|\)\@=/ end=/|.*\n\(\n\|{\)/ containedin=ALLBUT,pandocDelimitedCodeBlock,pandocYAMLHeader keepend 
 " without beginning and end pipes
 syn region pandocPipeTable start=/\%#=2^.*\n-.\{-}|/ end=/|.*\n\n/ keepend
 syn match pandocPipeTableDelims /[\|\-:+]/ contained containedin=pandocPipeTable
@@ -425,11 +427,11 @@ call s:WithConceal("footnote", 'syn match pandocFootnoteIDTail /\]/ contained co
 " List Items: {{{2
 "
 " Unordered lists
-syn match pandocUListItem /^>\=\s*[*+-]\s\+-\@!.*$/ nextgroup=pandocUListItem,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocDelimitedCodeBlock,pandocListItemContinuation contains=@Spell,pandocEmphasis,pandocStrong,pandocNoFormatted,pandocStrikeout,pandocSubscript,pandocSuperscript,pandocStrongEmphasis,pandocStrongEmphasis,pandocPCite,pandocICite,pandocCiteKey,pandocReferenceLabel,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocReferenceURL,pandocAutomaticLink skipempty display
+syn match pandocUListItem /^>\=\s*[*+-]\s\+-\@!.*$/ nextgroup=pandocUListItem,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocDelimitedCodeBlock,pandocListItemContinuation contains=@Spell,pandocEmphasis,pandocStrong,pandocNoFormatted,pandocStrikeout,pandocSubscript,pandocSuperscript,pandocStrongEmphasis,pandocStrongEmphasis,pandocPCite,pandocICite,pandocCiteKey,pandocReferenceLabel,pandocLaTeXCommand,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocReferenceURL,pandocAutomaticLink skipempty display
 call s:WithConceal('list', 'syn match pandocUListItemBullet /^>\=\s*\zs[*+-]/ contained containedin=pandocUListItem', 'conceal cchar='.s:cchars['li'])
 
 " Ordered lists
-syn match pandocListItem /^\s*(\?\(\d\+\|\l\|\#\|@\)[.)].*$/ nextgroup=pandocListItem,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocDelimitedCodeBlock,pandocListItemContinuation contains=@Spell,pandocEmphasis,pandocStrong,pandocNoFormatted,pandocStrikeout,pandocSubscript,pandocSuperscript,pandocStrongEmphasis,pandocStrongEmphasis,pandocPCite,pandocICite,pandocCiteKey,pandocReferenceLabel,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocAutomaticLink skipempty display 
+syn match pandocListItem /^\s*(\?\(\d\+\|\l\|\#\|@\)[.)].*$/ nextgroup=pandocListItem,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocDelimitedCodeBlock,pandocListItemContinuation contains=@Spell,pandocEmphasis,pandocStrong,pandocNoFormatted,pandocStrikeout,pandocSubscript,pandocSuperscript,pandocStrongEmphasis,pandocStrongEmphasis,pandocPCite,pandocICite,pandocCiteKey,pandocReferenceLabel,pandocLaTeXCommand,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocAutomaticLink skipempty display 
 " support for roman numerals up to 'c'
 if g:pandoc#syntax#roman_lists != 0
     syn match pandocListItem /^\s*(\?x\=l\=\(i\{,3}[vx]\=\)\{,3}c\{,3}[.)].*$/ nextgroup=pandocListItem,pandocMathBlock,pandocLaTeXInlineMath,pandocDelimitedCodeBlock,pandocListItemContinuation,pandocAutomaticLink skipempty display 
@@ -437,12 +439,16 @@ endif
 syn match pandocListItemBullet /^(\?.\{-}[.)]/ contained containedin=pandocListItem
 syn match pandocListItemBulletId /\(\d\+\|\l\|\#\|@.\{-}\|x\=l\=\(i\{,3}[vx]\=\)\{,3}c\{,3}\)/ contained containedin=pandocListItemBullet
 
-syn match pandocListItemContinuation /^\s\+\([-+*]\s\+\|(\?.\+[).]\)\@<!\([[:alpha:]ñäëïöüáéíóúàèìòùłßÄËÏÖÜÁÉÍÓÚÀÈÌÒÙŁß_"[]\|\*\S\)\@=.*$/ nextgroup=pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocDelimitedCodeBlock,pandocListItemContinuation,pandocListItem contains=@Spell,pandocEmphasis,pandocStrong,pandocNoFormatted,pandocStrikeout,pandocSubscript,pandocSuperscript,pandocStrongEmphasis,pandocStrongEmphasis,pandocPCite,pandocICite,pandocCiteKey,pandocReferenceLabel,pandocReferenceURL,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocAutomaticLink contained skipempty display 
+syn match pandocListItemContinuation /^\s\+\([-+*]\s\+\|(\?.\+[).]\)\@<!\([[:alpha:]ñäëïöüáéíóúàèìòùłßÄËÏÖÜÁÉÍÓÚÀÈÌÒÙŁß_"[]\|\*\S\)\@=.*$/ nextgroup=pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocDelimitedCodeBlock,pandocListItemContinuation,pandocListItem contains=@Spell,pandocEmphasis,pandocStrong,pandocNoFormatted,pandocStrikeout,pandocSubscript,pandocSuperscript,pandocStrongEmphasis,pandocStrongEmphasis,pandocPCite,pandocICite,pandocCiteKey,pandocReferenceLabel,pandocReferenceURL,pandocLaTeXCommand,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocAutomaticLink contained skipempty display 
 " }}}
 " Definitions: {{{2
 "
 syn region pandocDefinitionBlock start=/^\%(\_^\s*\([`~]\)\1\{2,}\)\@!.*\n\(^\s*\n\)\=\s\{0,2}[:~]\(\~\{2,}\~*\)\@!/ skip=/\n\n\zs\s/ end=/\n\n/ contains=pandocDefinitionBlockMark,pandocDefinitionBlockTerm,pandocCodeBlockInsideIndent,pandocEmphasis,pandocStrong,pandocStrongEmphasis,pandocNoFormatted,pandocStrikeout,pandocSubscript,pandocSuperscript,pandocFootnoteID,pandocReferenceURL,pandocReferenceLabel,pandocLaTeXMathBlock,pandocLaTeXInlineMath,pandocAutomaticLink,pandocEmDash,pandocEnDash
+<<<<<<< HEAD
 syn match pandocDefinitionBlockTerm /^.*\n\(^\s*\n\)\=\(\s*[:~]\)\@=/ contained contains=pandocNoFormatted,pandocEmphasis,pandocStrong nextgroup=pandocDefinitionBlockMark
+=======
+syn match pandocDefinitionBlockTerm /^.*\n\(^\s*\n\)\=\(\s*[:~]\)\@=/ contained contains=pandocNoFormatted,pandocEmphasis,pandocStrong,pandocLaTeXInlineMath nextgroup=pandocDefinitionBlockMark
+>>>>>>> upstream/master
 call s:WithConceal("definition", 'syn match pandocDefinitionBlockMark /^\s*[:~]/ contained', 'conceal cchar='.s:cchars["definition"])
 " }}}
 " Special: {{{2
